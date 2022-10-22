@@ -10,7 +10,8 @@ target_sources(
     ${CMAKE_PROJECT_NAME} 
     PRIVATE
     src/main.cpp
-    inc/ConstructorClass.hpp
+    # inc/ConstructorClass.hpp
+    # inc/Bitoperations.hpp
 )
 
 target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE inc)
@@ -22,6 +23,7 @@ add_executable(tests)
 target_sources(tests PRIVATE
 tests/main.cpp
 tests/ConstructorClassTests.cpp
+tests/BitOperationsTests.cpp
 )
 
 target_include_directories(tests PRIVATE inc)
