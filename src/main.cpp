@@ -1,11 +1,15 @@
 
 #include <iostream>
 
+void run();
+
 int main(int argc, char const *argv[])
 {
-    std::cout << "Hello world!" << std::endl;
+    std::cout << "Program started.\n";
     
+    run();
     
-    // while (1) { } // Problematic with valgrind etc
+    std::cout << "Program ended.\n";
+
     return 0;
 }

@@ -4,7 +4,7 @@
 if [[ ! -d "build" ]]; then
     mkdir build
     cd build
-    cmake -DCMAKE_BUILD_TYPE=Relese ..
+    cmake -DCMAKE_BUILD_TYPE=Relese .. || cd .. && rm -rf build
 else
     cd build
 fi
@@ -13,13 +13,13 @@ fi
 make VERBOSE=0 || exit 1
 
 # Build the tests
-make test VERBOSE=0 || exit 1
+# make test VERBOSE=0 || exit 1
 
 # Run the app
 ./app
 
 # Run the tests
-./tests
+ctest
 
 # Run valgrind memory leak tests to app
 valgrind --leak-check=yes ./app

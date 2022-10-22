@@ -10,13 +10,16 @@ target_sources(
     ${CMAKE_PROJECT_NAME} 
     PRIVATE
     src/main.cpp
-    # inc/ConstructorClass.hpp
-    # inc/Bitoperations.hpp
+    src/TaskUsage.cpp
 )
 
 target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE inc)
 
+add_subdirectory(ThreadSubmodule)
+target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE ThreadLibraryExample)
 
+
+# Ctest / catch2 
 add_subdirectory(Catch2)
 add_executable(tests)
 
