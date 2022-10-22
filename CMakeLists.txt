@@ -24,6 +24,9 @@ target_sources(tests PRIVATE
 tests/main.cpp
 tests/ConstructorClassTests.cpp
 tests/BitOperationsTests.cpp
+src/Ringbuffer.c
+tests/RingbufferTests.cpp
+tests/TwosComplementTests.cpp
 )
 
 target_include_directories(tests PRIVATE inc)

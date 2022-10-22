@@ -6,6 +6,7 @@ TEST_CASE("Testing macros: check assumptions")
 {
     CHECK(((!!0) == 0));
     CHECK((((!(!(0)))) == 0));
+    
     for (uint8_t i = 1; i < UINT8_MAX; i++)
     {
         CHECK(((!!i) == 1));
