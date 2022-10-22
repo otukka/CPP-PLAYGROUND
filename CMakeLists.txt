@@ -4,12 +4,16 @@ set(CMAKE_VERBOSE_MAKEFILE ON)
 
 project(app VERSION 1.0.0)
 
-add_executable(app)
+add_executable(${CMAKE_PROJECT_NAME})
 
-target_sources(app PRIVATE
-src/main.cpp
+target_sources(
+    ${CMAKE_PROJECT_NAME} 
+    PRIVATE
+    src/main.cpp
+    inc/ConstructorClass.hpp
 )
-target_include_directories(app PRIVATE src)
+
+target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE inc)
 
 
 add_subdirectory(Catch2)
@@ -17,11 +21,11 @@ add_executable(tests)
 
 target_sources(tests PRIVATE
 tests/main.cpp
-tests/test_example_class.cpp
-src/ExampleClass.cpp
+tests/ConstructorClassTests.cpp
 )
 
-target_include_directories(tests PRIVATE src)
+target_include_directories(tests PRIVATE inc)
+
 target_link_libraries(tests PRIVATE Catch2::Catch2)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/Catch2/contrib/")
