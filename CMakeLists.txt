@@ -26,7 +26,7 @@ tests/ConstructorClassTests.cpp
 
 target_include_directories(tests PRIVATE inc)
 
-target_link_libraries(tests PRIVATE Catch2::Catch2)
+target_link_libraries(tests PRIVATE Catch2::Catch2WithMain)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/Catch2/contrib/")
 
