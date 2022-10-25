@@ -11,18 +11,16 @@
 
 #include "TaskExample.hpp"
 
-
 #include "nlohmann/json.hpp"
 
 TaskExample::TaskExample()
-{   
-
+{
 }
 
 std::string datetime()
 {
     time_t rawtime;
-    struct tm *timeinfo;
+    struct tm* timeinfo;
     char buffer[80];
 
     time(&rawtime);
@@ -31,7 +29,6 @@ std::string datetime()
     strftime(buffer, 80, "%Y-%m-%d_%H-%M-%S", timeinfo);
     return std::string(buffer);
 }
-
 
 bool TaskExample::init()
 {
@@ -48,11 +45,10 @@ void TaskExample::loop()
 {
     this->m_running = 1;
 
-    while(m_running == 1)
+    while (m_running == 1)
     {
 
-
-        std::string msg{};
+        std::string msg {};
         bool status = m_queues.at("test")->pop_front(&msg);
         if (status == true)
         {
@@ -64,15 +60,13 @@ void TaskExample::loop()
         }
         std::cout << datetime() << ": messages in queue: " << m_queues.at("test")->size() << std::endl;
     }
-    
 
     return;
 }
 
 bool TaskExample::stop()
-{   
+{
     this->m_running = 0;
     this->m_thread.join();
     return true;
 }
-

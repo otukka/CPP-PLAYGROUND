@@ -26,7 +26,7 @@ TEST_CASE("Distinguish empty and full")
 TEST_CASE("Fill to full then empty")
 {
     ringbufferInit();
- 
+
     CHECK(isEmpty() == true);
     CHECK(isFull() == false);
 

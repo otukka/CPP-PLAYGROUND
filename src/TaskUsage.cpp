@@ -7,20 +7,19 @@
 
 void run()
 {
-    TaskExample T{};
+    TaskExample T {};
     T.init();
-    
+
     T.createQueue("test", 500);
 
     T.run();
 
-
     std::this_thread::sleep_for(std::literals::chrono_literals::operator""ms(2500));
     for (size_t i = 0; i < 10; i++)
     {
-        T.pushMessage("test", "msg form another thread "+std::to_string(i));
+        T.pushMessage("test", "msg form another thread " + std::to_string(i));
     }
-    
+
     std::this_thread::sleep_for(std::literals::chrono_literals::operator""ms(2500));
 
     T.stop();

@@ -1,6 +1,5 @@
 
 
-
 /*
  * Bit operations
  * a=target variable

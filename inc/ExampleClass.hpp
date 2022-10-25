@@ -4,7 +4,7 @@
 class ExampleClass
 {
 private:
-    int *m_ptr;
+    int* m_ptr;
 
 public:
     ExampleClass();

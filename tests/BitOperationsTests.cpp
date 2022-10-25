@@ -1,20 +1,19 @@
 #include <catch2/catch_all.hpp>
 #include "BitOperations.hpp"
 
-
 TEST_CASE("Testing macros: check assumptions")
 {
     CHECK(((!!0) == 0));
     CHECK((((!(!(0)))) == 0));
-    
+
     for (uint8_t i = 1; i < UINT8_MAX; i++)
     {
         CHECK(((!!i) == 1));
     }
 
-    CHECK(1);       // 1 = true
-    CHECK_FALSE(0); // 0 = false
-    CHECK(true);       // 1 = true
+    CHECK(1);           // 1 = true
+    CHECK_FALSE(0);     // 0 = false
+    CHECK(true);        // 1 = true
     CHECK_FALSE(false); // 0 = false
 }
 

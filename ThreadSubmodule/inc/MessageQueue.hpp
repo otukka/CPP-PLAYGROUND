@@ -2,7 +2,6 @@
 Derivative from https://stackoverflow.com/a/16075550
 */
 
-
 #ifndef _MESSAGE_QUEUE_HPP_
 #define _MESSAGE_QUEUE_HPP_
 
@@ -12,68 +11,71 @@ Derivative from https://stackoverflow.com/a/16075550
 #include <chrono>
 #include <iostream>
 
-
-template <class T>
-class MessageQueue
+template <class T> class MessageQueue
 {
 public:
-  MessageQueue(void) : queue(), mutex(), condition_variable(), m_timeout(std::literals::chrono_literals::operator""ms(0)){};
+    MessageQueue(void)
+        : queue()
+        , mutex()
+        , condition_variable()
+        , m_timeout(std::literals::chrono_literals::operator""ms(0)) {};
 
-  MessageQueue(uint32_t timeout) : queue(), mutex(), condition_variable(), m_timeout(std::literals::chrono_literals::operator""ms(timeout)){};
+    MessageQueue(uint32_t timeout)
+        : queue()
+        , mutex()
+        , condition_variable()
+        , m_timeout(std::literals::chrono_literals::operator""ms(timeout)) {};
 
-  ~MessageQueue(void){}
-
-  void push_back(T t)
-  {
-    std::lock_guard<std::mutex> lock(mutex);
-    queue.push(t);
-    condition_variable.notify_one();
-
-  }
-
-
-  bool pop_front(T* ret)
-  {
-    std::unique_lock<std::mutex> lock(mutex);
-
-
-    if (queue.empty())
+    ~MessageQueue(void)
     {
-        if (m_timeout == std::literals::chrono_literals::operator""s(0))
+    }
+
+    void push_back(T t)
+    {
+        std::lock_guard<std::mutex> lock(mutex);
+        queue.push(t);
+        condition_variable.notify_one();
+    }
+
+    bool pop_front(T* ret)
+    {
+        std::unique_lock<std::mutex> lock(mutex);
+
+        if (queue.empty())
         {
-            condition_variable.wait(lock);
+            if (m_timeout == std::literals::chrono_literals::operator""s(0))
+            {
+                condition_variable.wait(lock);
+            }
+            else
+            {
+                std::cv_status status = condition_variable.wait_for(lock, this->m_timeout);
+                if (status == std::cv_status::timeout)
+                {
+                    return false;
+                }
+            }
         }
         else
         {
-            std::cv_status status = condition_variable.wait_for(lock, this->m_timeout);
-            if (status == std::cv_status::timeout)
-            {
-                return false;
-            }
+            lock.unlock();
         }
+
+        *ret = queue.front();
+        queue.pop();
+        return true;
     }
-    else
+
+    size_t size(void)
     {
-        lock.unlock();
+        return queue.size();
     }
-
-
-    *ret = queue.front();
-    queue.pop();
-    return true;
-
-  }
-
-  size_t size(void)
-  {
-    return queue.size(); 
-  }
 
 private:
-  std::queue<T> queue;
-  mutable std::mutex mutex;
-  std::condition_variable condition_variable;
-  std::chrono::duration<long double> m_timeout;
+    std::queue<T> queue;
+    mutable std::mutex mutex;
+    std::condition_variable condition_variable;
+    std::chrono::duration<long double> m_timeout;
 };
 
 #endif // _MESSAGE_QUEUE_HPP_

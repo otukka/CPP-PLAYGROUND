@@ -24,7 +24,8 @@ public:
 
     void createQueue(std::string queue, uint32_t timeout)
     {
-        m_queues.insert(std::pair<std::string, std::shared_ptr<MessageQueue<std::string>>>(queue, std::shared_ptr<MessageQueue<std::string>>(new MessageQueue<std::string>(timeout))));
+        m_queues.insert(std::pair<std::string, std::shared_ptr<MessageQueue<std::string>>>(
+            queue, std::shared_ptr<MessageQueue<std::string>>(new MessageQueue<std::string>(timeout))));
     }
 
     std::shared_ptr<MessageQueue<std::string>> getQueue(std::string queue)
@@ -38,7 +39,6 @@ public:
         m_queues.insert(std::pair<std::string, std::shared_ptr<MessageQueue<std::string>>>(queue, shr_ptr));
     }
 
-
     void pushMessage(std::string queue, std::string msg)
     {
         auto it = m_queues.find(queue);
@@ -46,10 +46,6 @@ public:
     }
 
 private:
-
 };
 
-
 #endif // _TASK_WORKER_HPP_
-
-

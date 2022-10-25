@@ -19,4 +19,3 @@ public:
 };
 
 #endif // !_SERIAL_TASK_HPP_
-
