@@ -1,5 +1,5 @@
 [submodule "Catch2"]
-	path = tests/Catch2
+	path = Catch2
 	url = https://github.com/catchorg/Catch2.git
 [submodule "ThreadSubmodule/json"]
 	path = ThreadSubmodule/json

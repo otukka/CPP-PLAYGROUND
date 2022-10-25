@@ -50,8 +50,19 @@ void TaskExample::loop()
 
     while(m_running == 1)
     {
-        std::cout << datetime() << std::endl;
-        std::this_thread::sleep_for(std::literals::chrono_literals::operator""s(1));
+
+
+        std::string msg{};
+        bool status = m_queues.at("test")->pop_front(&msg);
+        if (status == true)
+        {
+            std::cout << datetime() << ": " << msg << std::endl;
+        }
+        else
+        {
+            std::cout << datetime() << ": timeout" << std::endl;
+        }
+        std::cout << datetime() << ": messages in queue: " << m_queues.at("test")->size() << std::endl;
     }
     
 

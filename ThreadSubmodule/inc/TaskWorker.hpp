@@ -22,9 +22,9 @@ public:
     virtual bool run() = 0;
     virtual bool stop() = 0;
 
-    void createQueue(std::string queue)
+    void createQueue(std::string queue, uint32_t timeout)
     {
-        m_queues.insert(std::pair<std::string, std::shared_ptr<MessageQueue<std::string>>>(queue, std::shared_ptr<MessageQueue<std::string>>(new MessageQueue<std::string>())));
+        m_queues.insert(std::pair<std::string, std::shared_ptr<MessageQueue<std::string>>>(queue, std::shared_ptr<MessageQueue<std::string>>(new MessageQueue<std::string>(timeout))));
     }
 
     std::shared_ptr<MessageQueue<std::string>> getQueue(std::string queue)
