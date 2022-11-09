@@ -45,7 +45,9 @@ public:
         {
             if (m_timeout == std::literals::chrono_literals::operator""s(0))
             {
+                // unlock lock, then waits, and lastly locks again when signal is received
                 condition_variable.wait(lock);
+                std::cout << "here" << std::endl;
             }
             else
             {
@@ -56,13 +58,11 @@ public:
                 }
             }
         }
-        else
-        {
-            lock.unlock();
-        }
 
         *ret = queue.front();
         queue.pop();
+        // Cant use lock_guard (why?), so need to ulock.
+        lock.unlock();
         return true;
     }
 

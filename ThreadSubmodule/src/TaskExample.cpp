@@ -50,6 +50,7 @@ void TaskExample::loop()
 
         std::string msg {};
         bool status = m_queues.at("test")->pop_front(&msg);
+
         if (status == true)
         {
             std::cout << datetime() << ": " << msg << std::endl;
