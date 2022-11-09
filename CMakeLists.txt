@@ -30,6 +30,7 @@ tests/BitOperationsTests.cpp
 src/Ringbuffer.c
 tests/RingbufferTests.cpp
 tests/TwosComplementTests.cpp
+tests/AnonymousStruct.cpp
 )
 
 target_include_directories(tests PRIVATE inc)
