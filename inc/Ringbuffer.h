@@ -52,4 +52,4 @@ bool isValid(void);
 }
 #endif
 
-#endif // !RINGBUFFER_H_
+#endif  // !RINGBUFFER_H_

@@ -18,6 +18,13 @@ namespace Constructors
 #define PRINT_CONSTRUCTORS_WHEN_USED 0
 #endif
 
+void printHelper(std::string msg)
+{
+#if (PRINT_CONSTRUCTORS_WHEN_USED == 1)
+    std::cout << msg;
+#endif
+}
+
 enum Constructor
 {
     Default = 0,
@@ -55,14 +62,9 @@ private:
 
 public:
     // // Default constructor
-    ConstructorClass()
-        : m_order(0)
-        , m_data(0)
-        , m_constructor(Constructor::Default)
+    ConstructorClass() : m_order(0), m_data(0), m_constructor(Constructor::Default)
     {
-#if (PRINT_CONSTRUCTORS_WHEN_USED == 1)
-        std::cout << "Default constructor\n";
-#endif
+        printHelper("Default constructor\n");
 
         m_ptr = new uint8_t();
         *m_ptr = 0;
@@ -72,82 +74,62 @@ public:
     ~ConstructorClass()
     {
 
-#if (PRINT_CONSTRUCTORS_WHEN_USED == 1)
-        std::cout << "Destructor\n";
-#endif
+        printHelper("Destructor\n");
 
         delete m_ptr;
     }
 
     // lvalue constructor
-    ConstructorClass(const int& a_order, const int& a_data)
-        : m_order(a_order)
-        , m_data(a_data)
-        , m_constructor(Constructor::lvalueParam)
+    ConstructorClass(const int& order, const int& data) :
+        m_order(order), m_data(data), m_constructor(Constructor::lvalueParam)
     {
 
-#if (PRINT_CONSTRUCTORS_WHEN_USED == 1)
-        std::cout << "lvalue constructor\n";
-#endif
+        printHelper("lvalue constructor\n");
 
         m_ptr = new uint8_t();
         *m_ptr = 0;
     }
 
     // rvalue constructor
-    ConstructorClass(const int&& a_order, const int&& a_data)
-        : m_order(a_order)
-        , m_data(a_data)
-        , m_constructor(Constructor::rvalueParam)
+    ConstructorClass(const int&& order, const int&& data) :
+        m_order(order), m_data(data), m_constructor(Constructor::rvalueParam)
     {
 
-#if (PRINT_CONSTRUCTORS_WHEN_USED == 1)
-        std::cout << "rvalue constructor\n";
-#endif
+        printHelper("rvalue constructor\n");
 
         m_ptr = new uint8_t();
         *m_ptr = 0;
     }
 
     // Copy constructor (lvalue)
-    ConstructorClass(const ConstructorClass& other)
-        : m_order(other.m_order)
-        , m_data(other.m_data)
-        , m_constructor(Constructor::Copy)
+    ConstructorClass(const ConstructorClass& other) :
+        m_order(other.m_order), m_data(other.m_data), m_constructor(Constructor::Copy)
     {
 
-#if (PRINT_CONSTRUCTORS_WHEN_USED == 1)
-        std::cout << "Copy constructor\n";
-#endif
+        printHelper("Copy constructor\n");
 
         m_ptr = new uint8_t();
         *m_ptr = *other.m_ptr;
     }
 
     // Copy operator (lvalue)
-    ConstructorClass& operator=(ConstructorClass& other)
+    ConstructorClass& operator=(const ConstructorClass& other)
     {
 
-#if (PRINT_CONSTRUCTORS_WHEN_USED == 1)
-        std::cout << "Copy operator\n";
-#endif
-
-        swap(*this, other);
+        printHelper("Copy operator\n");
+        ConstructorClass tmp(other);
+        swap(*this, tmp);
         this->m_constructor = Constructor::CopyAssign;
         return *this;
     }
 
     // Move constructor (rvalue)
-    ConstructorClass(ConstructorClass&& other) noexcept
-        : m_order(std::move(other.m_order))
-        , m_data(std::move(other.m_data))
-        , m_ptr(std::move(other.m_ptr))
-        , m_constructor(Constructor::Move)
+    ConstructorClass(ConstructorClass&& other) noexcept :
+        m_order(std::move(other.m_order)), m_data(std::move(other.m_data)), m_ptr(std::move(other.m_ptr)),
+        m_constructor(Constructor::Move)
     {
 
-#if (PRINT_CONSTRUCTORS_WHEN_USED == 1)
-        std::cout << "Move constructor\n";
-#endif
+        printHelper("Move constructor\n");
 
         other.m_data = FORGOTTEN_NUMBER;
         other.m_order = FORGOTTEN_NUMBER;
@@ -159,9 +141,7 @@ public:
     ConstructorClass& operator=(ConstructorClass&& other)
     {
 
-#if (PRINT_CONSTRUCTORS_WHEN_USED == 1)
-        std::cout << "Move operator\n";
-#endif
+        printHelper("Move operator\n");
 
         if (this != &other)
         {
@@ -185,9 +165,7 @@ public:
     friend void swap(ConstructorClass& a, ConstructorClass& b)
     {
 
-#if (PRINT_CONSTRUCTORS_WHEN_USED == 1)
-        std::cout << "Swap\n";
-#endif
+        printHelper("Swap\n");
 
         std::swap(a.m_data, b.m_data);
         std::swap(a.m_order, b.m_order);
@@ -216,15 +194,11 @@ public:
         return ConstructorClass(this->m_order, this->m_data - data);
     }
 
-    bool checkState(State a_state)
+    bool checkState(State state)
     {
 
-        if (this->m_data == a_state.m_data && this->m_order == a_state.m_order && *this->m_ptr == a_state.value
-            && this->m_constructor == a_state.m_constructor)
-        {
-            return true;
-        }
-        return false;
+        return (this->m_data == state.m_data && this->m_order == state.m_order && *this->m_ptr == state.value
+                && this->m_constructor == state.m_constructor);
     }
 
     bool isFrogotten()
@@ -232,10 +206,10 @@ public:
         return m_constructor == Constructor::Forgotten;
     }
 
-    bool _checkState(State a_state)
+    bool _checkState(State state)
     {
         std::cout << *this << std::endl;
-        return checkState(a_state);
+        return checkState(state);
     }
 
     int getOrder()
@@ -246,21 +220,21 @@ public:
     {
         return this->m_data;
     }
-    void setOrder(const int& a_order)
+    void setOrder(const int& order)
     {
-        m_order = a_order;
+        m_order = order;
     }
-    void setData(const int& a_data)
+    void setData(const int& data)
     {
-        m_data = a_data;
+        m_data = data;
     }
-    void setOrder(const int&& a_order)
+    void setOrder(const int&& order)
     {
-        m_order = a_order;
+        m_order = order;
     }
-    void setData(const int&& a_data)
+    void setData(const int&& data)
     {
-        m_data = a_data;
+        m_data = data;
     }
     friend auto operator<<(std::ostream& os, ConstructorClass const& m) -> std::ostream&
     {
@@ -305,7 +279,6 @@ std::string value(const ConstructorClass&& mc)
 {
     return "rvalue";
 }
-
 }
 
 #endif // __CONSTRUCTORCLASS_H__

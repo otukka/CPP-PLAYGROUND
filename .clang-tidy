@@ -1,5 +1,5 @@
 ---
-Checks:  '*,-llvm*,-performance-no-int-to-ptr,-altera-*'
+Checks:  '*,-llvm*,-performance-no-int-to-ptr,-altera-*,-modernize-use-trailing-*'
 CheckOptions:
   - { key: readability-identifier-naming.ClassCase, value: CamelCase }
   - { key: readability-identifier-naming.EnumCase, value: camelBack }
@@ -11,6 +11,6 @@ CheckOptions:
   - { key: readability-identifier-naming.EnumConstantCase,  value: UPPER_CASE }
   - { key: readability-identifier-naming.TypedefCase,  value: camelBack }
   - { key: readability-identifier-naming.MacroDefinitionCase,  value: UPPER_CASE }
-  - { key: readability-identifier-naming.MacroDefinitionIgnoredRegexp,  value: "_[A-Z_]+_H_" }
+  - { key: readability-identifier-naming.MacroDefinitionIgnoredRegexp,  value: "[A-Z_]+_HPP_" }
 ...
 

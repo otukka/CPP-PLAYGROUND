@@ -1,5 +1,5 @@
-#ifndef _SERIAL_TASK_HPP_
-#define _SERIAL_TASK_HPP_
+#ifndef SERIAL_TASK_HPP_
+#define SERIAL_TASK_HPP_
 
 #include <string>
 #include "TaskWorker.hpp"
@@ -11,11 +11,10 @@ private:
     void loop();
 
 public:
-    TaskExample();
-    virtual ~TaskExample() = default;
-    virtual bool init();
-    virtual bool run();
-    virtual bool stop();
+    explicit TaskExample(const std::string& name);
+    bool init() override;
+    bool run() override;
+    bool stop() override;
 };
 
-#endif // !_SERIAL_TASK_HPP_
+#endif // !SERIAL_TASK_HPP_

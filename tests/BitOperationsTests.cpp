@@ -11,10 +11,10 @@ TEST_CASE("Testing macros: check assumptions")
         CHECK(((!!i) == 1));
     }
 
-    CHECK(1);           // 1 = true
-    CHECK_FALSE(0);     // 0 = false
-    CHECK(true);        // 1 = true
-    CHECK_FALSE(false); // 0 = false
+    CHECK(1);            // 1 = true
+    CHECK_FALSE(0);      // 0 = false
+    CHECK(true);         // 1 = true
+    CHECK_FALSE(false);  // 0 = false
 }
 
 TEST_CASE("Testing macros: bit: sequence", "[bit]")

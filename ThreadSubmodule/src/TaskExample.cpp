@@ -1,5 +1,6 @@
 
 #include <iostream>
+#include <chrono>
 #include <string>
 #include <fstream>
 #include <cstring>
@@ -13,21 +14,17 @@
 
 #include "nlohmann/json.hpp"
 
-TaskExample::TaskExample()
-{
-}
+TaskExample::TaskExample(const std::string& name) : TaskWorker(name) {}
 
 std::string datetime()
 {
-    time_t rawtime;
-    struct tm* timeinfo;
-    char buffer[80];
-
-    time(&rawtime);
-    timeinfo = localtime(&rawtime);
-
-    strftime(buffer, 80, "%Y-%m-%d_%H-%M-%S", timeinfo);
-    return std::string(buffer);
+    const auto now = std::chrono::system_clock::now();
+    const auto nowAsTimeT = std::chrono::system_clock::to_time_t(now);
+    const auto nowMs = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch()) % 1000;
+    std::stringstream nowSs;
+    nowSs << std::put_time(std::localtime(&nowAsTimeT), "%Y-%m-%d %T") << '.' << std::setfill('0') << std::setw(3)
+          << nowMs.count();
+    return nowSs.str();
 }
 
 bool TaskExample::init()
@@ -43,23 +40,19 @@ bool TaskExample::run()
 
 void TaskExample::loop()
 {
-    this->m_running = 1;
+    this->m_running = true;
 
-    while (m_running == 1)
+    while (m_running == true)
     {
 
-        std::string msg {};
-        bool status = m_queues.at("test")->pop_front(&msg);
+        std::string msg{};
+        bool status = m_queue->pop_front(msg);
 
+        // Message received otherwise timeout.
         if (status == true)
         {
-            std::cout << datetime() << ": " << msg << std::endl;
+            std::cout << datetime() << " [msg] " << msg << std::endl;
         }
-        else
-        {
-            std::cout << datetime() << ": timeout" << std::endl;
-        }
-        std::cout << datetime() << ": messages in queue: " << m_queues.at("test")->size() << std::endl;
     }
 
     return;
@@ -67,7 +60,8 @@ void TaskExample::loop()
 
 bool TaskExample::stop()
 {
-    this->m_running = 0;
+    this->m_running = false;
+    this->pushMessage("stop");
     this->m_thread.join();
     return true;
 }

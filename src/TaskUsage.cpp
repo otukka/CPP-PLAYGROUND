@@ -5,28 +5,33 @@
 #include <thread>
 #include <string>
 
+using namespace std::chrono_literals;
+using millis = std::chrono::duration<uint32_t, std::milli>;
+
 void run()
 {
-    TaskExample T {};
-    T.init();
 
-    // T.createQueue("test", 600);
-    T.createQueue("test", 0);
+    TaskExample exampleTask("exampleThread");
 
-    T.run();
+    if (exampleTask.init() != true)
+    {
+        return;
+    }
 
-    std::this_thread::sleep_for(std::literals::chrono_literals::operator""ms(2500));
+    // exampleTask.createQueue(100);
+    // exampleTask.createQueue(10000);
+    // exampleTask.createQueue(1000);
+    exampleTask.createQueue(UINT32_MAX);
+
+    exampleTask.run();
+
+    std::this_thread::sleep_for(millis(50));
     for (size_t i = 0; i < 10; i++)
     {
-        T.pushMessage("test", "msg form another thread " + std::to_string(i));
+        exampleTask.pushMessage("msg " + std::to_string(i) + " form main thread ");
+        std::this_thread::sleep_for(millis(5));
     }
-    std::this_thread::sleep_for(std::literals::chrono_literals::operator""ms(2500));
-    for (size_t i = 10; i < 15; i++)
-    {
-        T.pushMessage("test", "msg form another thread " + std::to_string(i));
-    }
+    std::this_thread::sleep_for(millis(1000));
 
-    std::this_thread::sleep_for(std::literals::chrono_literals::operator""ms(2500));
-
-    T.stop();
+    exampleTask.stop();
 }

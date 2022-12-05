@@ -2,50 +2,43 @@
 #ifndef _TASK_WORKER_HPP_
 #define _TASK_WORKER_HPP_
 
-#include <unordered_map>
 #include <memory>
 #include <thread>
-#include <csignal>
+#include <atomic>
 #include "MessageQueue.hpp"
 
 class TaskWorker
 {
+private:
+
 protected:
+    std::string m_name;
     std::thread m_thread;
-    std::sig_atomic_t m_running;
-    std::unordered_map<std::string, std::shared_ptr<MessageQueue<std::string>>> m_queues;
+    std::atomic<bool> m_running;
+    std::shared_ptr<MessageQueue<std::string>> m_queue;
 
 public:
-    // TaskWorker();
-    virtual ~TaskWorker() = default;
+
+    TaskWorker(const std::string& name) : m_name { name }, m_running { false } {};
+
+    TaskWorker() = delete;
+    TaskWorker(const TaskWorker &other) = delete;
+    TaskWorker(const TaskWorker &&other) = delete;
+    TaskWorker& operator=(const TaskWorker &&other) = delete;
+
     virtual bool init() = 0;
     virtual bool run() = 0;
     virtual bool stop() = 0;
 
-    void createQueue(std::string queue, uint32_t timeout)
+    void createQueue(const uint32_t timeout)
     {
-        m_queues.insert(std::pair<std::string, std::shared_ptr<MessageQueue<std::string>>>(
-            queue, std::shared_ptr<MessageQueue<std::string>>(new MessageQueue<std::string>(timeout))));
+        m_queue = std::make_shared<MessageQueue<std::string>>(timeout);
     }
 
-    std::shared_ptr<MessageQueue<std::string>> getQueue(std::string queue)
+    void pushMessage(const std::string& msg)
     {
-        auto it = m_queues.find(queue);
-        return it->second;
+        m_queue->push_back(msg);
     }
-
-    void setQueue(std::string queue, std::shared_ptr<MessageQueue<std::string>> shr_ptr)
-    {
-        m_queues.insert(std::pair<std::string, std::shared_ptr<MessageQueue<std::string>>>(queue, shr_ptr));
-    }
-
-    void pushMessage(std::string queue, std::string msg)
-    {
-        auto it = m_queues.find(queue);
-        it->second->push_back(msg);
-    }
-
-private:
 };
 
 #endif // _TASK_WORKER_HPP_

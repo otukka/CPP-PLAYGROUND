@@ -3,7 +3,7 @@
 
 void run();
 
-int main(int argc, char const* argv[])
+int main()
 {
     std::cout << "Program started.\n";
 

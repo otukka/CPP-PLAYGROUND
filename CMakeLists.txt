@@ -18,10 +18,12 @@ target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE inc)
 add_subdirectory(ThreadSubmodule)
 target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE ThreadLibraryExample)
 
+target_compile_options(${CMAKE_PROJECT_NAME} PRIVATE -Wall -Wextra -pedantic -Werror -Wconversion)
 
 # Ctest / catch2 
 add_subdirectory(Catch2)
 add_executable(tests)
+
 
 target_sources(tests PRIVATE
 tests/main.cpp
@@ -31,6 +33,7 @@ src/Ringbuffer.c
 tests/RingbufferTests.cpp
 tests/TwosComplementTests.cpp
 tests/AnonymousStruct.cpp
+tests/roundTest.cpp
 )
 
 target_include_directories(tests PRIVATE inc)
