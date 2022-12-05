@@ -1,13 +1,24 @@
 #!/bin/bash
 
+ls -la
+
+whoami
+
+BUILD_DIR="build"
+
 # Create build folder if not exists
-if [[ ! -d "build" ]]; then
+if [ ! -d $BUILD_DIR ]; then
     mkdir build
+fi
+
+# Init cmake if not init before
+if [ "$(ls -A $BUILD_DIR)" ]; then
     cd build
-    cmake -DCMAKE_BUILD_TYPE=Debug .. || cd .. && rm -rf build
 else
     cd build
+    cmake -DCMAKE_BUILD_TYPE=Debug .. || cd .. && rm -rf build
 fi
+
 
 # Build the app
 make || exit 1
