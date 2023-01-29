@@ -1,5 +1,5 @@
-#ifndef __CONSTRUCTORCLASS_H__
-#define __CONSTRUCTORCLASS_H__
+#ifndef CONSTRUCTORCLASS_H
+#define CONSTRUCTORCLASS_H
 
 #include <iostream>
 #include <iomanip> /* std::setw*/
@@ -281,4 +281,4 @@ std::string value(const ConstructorClass&& mc)
 }
 }
 
-#endif // __CONSTRUCTORCLASS_H__
+#endif // CONSTRUCTORCLASS_H

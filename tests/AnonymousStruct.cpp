@@ -49,7 +49,7 @@ const std::unordered_map<OldImpl::types, NewImpl::types> mapConverter = {
     { OldImpl::types::B, NewImpl::types::C },
 };
 
-}
+
 
 NewImpl::types convertWithVector(OldImpl::types old)
 {
@@ -74,6 +74,7 @@ NewImpl::types convertWithMap(OldImpl::types old)
         ret = it->second;
     }
     return ret;
+}
 }
 
 TEST_CASE("Conversion test with vector container")

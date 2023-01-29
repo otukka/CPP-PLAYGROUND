@@ -32,6 +32,7 @@ tests/BitOperationsTests.cpp
 src/Ringbuffer.c
 tests/RingbufferTests.cpp
 tests/TwosComplementTests.cpp
+tests/PointerTests.cpp
 tests/AnonymousStruct.cpp
 tests/roundTest.cpp
 )
