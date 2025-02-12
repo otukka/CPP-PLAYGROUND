@@ -2,223 +2,272 @@
 
 #include "ConstructorClass.hpp"
 
-/* Tests */
-TEST_CASE("Unit test: testValue")
+namespace
 {
-    Constructors::ConstructorClass tmp1 = Constructors::ConstructorClass();
-    REQUIRE(Constructors::value(tmp1) == "lvalue");
-    REQUIRE(Constructors::value((Constructors::ConstructorClass&)tmp1) == "lvalue");
+using namespace Constructors;
 
-    REQUIRE(Constructors::value((Constructors::ConstructorClass &&) tmp1) == "rvalue");
-    REQUIRE(Constructors::value(std::move(tmp1)) == "rvalue");
-    REQUIRE(Constructors::value(tmp1 + 10) == "rvalue");
-    REQUIRE(Constructors::value(tmp1 - 10) == "rvalue");
-    int tmp_value = 10;
-    REQUIRE(Constructors::value(tmp1 + tmp_value) == "rvalue");
-    REQUIRE(Constructors::value(tmp1 - tmp_value) == "rvalue");
-
-    Constructors::ConstructorClass tmp2 = Constructors::ConstructorClass();
-    Constructors::ConstructorClass tmp3 = tmp2;
-    REQUIRE(Constructors::value(tmp3) == "lvalue");
-    REQUIRE(Constructors::value((Constructors::ConstructorClass&)tmp3) == "lvalue");
-
-    Constructors::ConstructorClass tmp4 = Constructors::ConstructorClass();
-    Constructors::ConstructorClass tmp5 = tmp4 + 10;
-    REQUIRE(Constructors::value(tmp4) == "lvalue");
-    REQUIRE(Constructors::value((Constructors::ConstructorClass&)tmp4) == "lvalue");
-}
-
-TEST_CASE("Unit test: testDefaultConstructor")
+class ConstructorClassWrapper
 {
-    Constructors::ConstructorClass tmp1 = Constructors::ConstructorClass();
-    REQUIRE(tmp1.checkState({ 0, 0, 0, Constructors::Constructor::Default }));
-    REQUIRE(!tmp1.checkState({ 1, 0, 0, Constructors::Constructor::Default }));
-    REQUIRE(!tmp1.checkState({ 0, 1, 0, Constructors::Constructor::Default }));
-    REQUIRE(!tmp1.checkState({ 0, 0, 1, Constructors::Constructor::Default }));
-    REQUIRE(!tmp1.checkState({ 1, 1, 1, Constructors::Constructor::Default }));
-
-    for (size_t i = Constructors::Constructor::SIZE + 1; i < Constructors::Constructor::SIZE; i++)
+public:
+    ConstructorClassWrapper() : sub1{}
     {
-        /* code */
-        REQUIRE(!tmp1.checkState({ 0, 0, 0, (Constructors::Constructor)i }));
+        sub2 = ConstructorClass();
     }
+
+    ~ConstructorClassWrapper() = default;
+
+    ConstructorClass sub1;
+    ConstructorClass sub2;
+};
+
 }
 
-TEST_CASE("Unit test: testParenthesisConstructor")
+#define CHECK_STATE(obj, order, data, value, constructor)                                                              \
+    CHECK(obj.getOrder() == order);                                                                                    \
+    CHECK(obj.getData() == data);                                                                                      \
+    CHECK(obj.getValue() == value);                                                                                    \
+    CHECK(obj.getConstructor() == constructor);
+
+#define CHECK_PTR_STATE(obj, order, data, value, constructor)                                                          \
+    CHECK(obj->getOrder() == order);                                                                                   \
+    CHECK(obj->getData() == data);                                                                                     \
+    CHECK(obj->getValue() == value);                                                                                   \
+    CHECK(obj->getConstructor() == constructor);
+
+/* Tests */
+TEST_CASE("lvalue or rvalue function")
 {
+    ConstructorClass tmp1 = ConstructorClass();
+    CHECK(lvalueORrvalue(tmp1) == "lvalue");
 
-    Constructors::ConstructorClass tmp1 = Constructors::ConstructorClass();
-    REQUIRE(tmp1.checkState({ 0, 0, 0, Constructors::Constructor::Default }));
+    CHECK(lvalueORrvalue((ConstructorClass&&)tmp1) == "rvalue");
 
-    Constructors::ConstructorClass tmp2();
-    // error: request for member ‘checkState’ in ‘tmp2’, which is of non-class type ‘Constructors::ConstructorClass()
-    // REQUIRE(tmp2.checkState({0, 0, 0, Constructors::Constructor::Default}));
+    CHECK(lvalueORrvalue(std::move(tmp1)) == "rvalue");
 
-    Constructors::ConstructorClass tmp3(tmp1);
-    REQUIRE(tmp3.checkState({ 0, 0, 0, Constructors::Constructor::Copy }));
+    CHECK(lvalueORrvalue(tmp1 + 10) == "rvalue");
 
-    auto tmp4 = Constructors::ConstructorClass(tmp1);
-    REQUIRE(tmp4.checkState({ 0, 0, 0, Constructors::Constructor::Copy }));
+    CHECK(lvalueORrvalue(tmp1 - 10) == "rvalue");
 
-    Constructors::ConstructorClass tmp5(10, 10);
-    REQUIRE(tmp5.checkState({ 10, 10, 0, Constructors::Constructor::rvalueParam }));
+    int16_t tmp_value = 10U;
+    CHECK(lvalueORrvalue(tmp1 + tmp_value) == "rvalue");
+    CHECK(lvalueORrvalue(tmp1 - tmp_value) == "rvalue");
 
-    // error: request for member ‘checkState’ in ‘tmp6’, which is of non-class type ‘MyDerivedClass()’
-    // MyDerivedClass tmp6();
-    // REQUIRE(tmp6.checkState({0, 0, 0, Constructors::Constructor::Default}));
+    ConstructorClass tmp2 = ConstructorClass();
+    ConstructorClass tmp3 = tmp2;
+    CHECK(lvalueORrvalue(tmp3) == "lvalue");
+    CHECK(lvalueORrvalue((ConstructorClass&)tmp3) == "lvalue");
 
-    Constructors::ConstructorClass tmp7(270, 270);
-    REQUIRE(!tmp7.checkState({ 0, 0, 0, Constructors::Constructor::Default }));
+    ConstructorClass tmp4 = ConstructorClass();
+    CHECK(lvalueORrvalue(tmp4) == "lvalue");
+
+    ConstructorClass tmp5 = tmp4 + 10;
+    CHECK(lvalueORrvalue(tmp5) == "lvalue");
+
+    CHECK(lvalueORrvalue((ConstructorClass&)tmp4) == "lvalue");
+
+    const ConstructorClass tmp6 = ConstructorClass();
+    CHECK(lvalueORrvalue(tmp4) == "lvalue");
 }
 
-TEST_CASE("Unit test: testBraceConstructor")
+TEST_CASE("parenthesis constructors")
 {
-    Constructors::ConstructorClass tmp1 = Constructors::ConstructorClass {};
-    REQUIRE(tmp1.checkState({ 0, 0, 0, Constructors::Constructor::Default }));
+    ConstructorClass tmp1 = ConstructorClass();
+    CHECK_STATE(tmp1, 0, 0, 0, Constructor::Default);
 
-    Constructors::ConstructorClass tmp2 {};
-    REQUIRE(tmp2.checkState({ 0, 0, 0, Constructors::Constructor::Default }));
+    // ConstructorClass tmp(); // Invalid
 
-    Constructors::ConstructorClass tmp3 = Constructors::ConstructorClass {};
-    REQUIRE(tmp3.checkState({ 0, 0, 0, Constructors::Constructor::Default }));
+    ConstructorClass tmp2(tmp1);
+    CHECK_STATE(tmp2, 0, 0, 0, Constructor::Copy);
 
-    auto tmp4 = Constructors::ConstructorClass {};
-    REQUIRE(tmp4.checkState({ 0, 0, 0, Constructors::Constructor::Default }));
+    ConstructorClass tmp3 = ConstructorClass(tmp1);
+    CHECK_STATE(tmp3, 0, 0, 0, Constructor::Copy);
 
-    Constructors::ConstructorClass tmp5 = {};
-    REQUIRE(tmp5.checkState({ 0, 0, 0, Constructors::Constructor::Default }));
+    ConstructorClass tmp4(10, 10);
+    CHECK_STATE(tmp4, 10, 10, 0, Constructor::rvalueParam);
 
-    // error: ‘class std::initializer_list<Constructors::ConstructorClass>’ has no member named ‘checkState’
-    // auto tmp6 = {tmp1};
-    // REQUIRE(tmp6.checkState({0, 0, 0, Constructors::Constructor::Default}));
+    ConstructorClass tmp5 = ConstructorClass(1, 1);
+    CHECK_STATE(tmp5, 1, 1, 0, Constructor::rvalueParam);
 
-    Constructors::ConstructorClass tmp7 { 270, 270 };
-    REQUIRE(!tmp7.checkState({ 0, 0, 0, Constructors::Constructor::Default }));
+    int16_t order = 1;
+    int16_t data = 1;
+
+    ConstructorClass tmp6 = ConstructorClass(order, data);
+    CHECK_STATE(tmp6, order, data, 0, Constructor::lvalueParam);
+
+    ConstructorClass tmp7(order, data);
+    CHECK_STATE(tmp7, order, data, 0, Constructor::lvalueParam);
 }
 
-TEST_CASE("Unit test: testRvalueConsturctor")
+TEST_CASE("braced constructor")
 {
-    Constructors::ConstructorClass tmp1 = Constructors::ConstructorClass(1, 1);
-    REQUIRE(tmp1.checkState({ 1, 1, 0, Constructors::Constructor::rvalueParam }));
-    REQUIRE(!tmp1.checkState({ 1, 1, 0, Constructors::Constructor::lvalueParam }));
-}
+    ConstructorClass tmp1 = ConstructorClass{};
+    CHECK_STATE(tmp1, 0, 0, 0, Constructor::Default);
 
-TEST_CASE("Unit test: testLvalueConsturctor")
-{
-    uint8_t order = 1;
-    uint8_t data = 1;
-    Constructors::ConstructorClass tmp1 = Constructors::ConstructorClass(order, data);
-    std::cout << tmp1 << std::endl;
-    REQUIRE(!tmp1.checkState({ order, data, 0, Constructors::Constructor::lvalueParam }));
-    REQUIRE(tmp1.checkState({ order, data, 0, Constructors::Constructor::rvalueParam }));
+    ConstructorClass tmp2{};
+    CHECK_STATE(tmp2, 0, 0, 0, Constructor::Default);
+
+    ConstructorClass tmp3 = {};
+    CHECK_STATE(tmp3, 0, 0, 0, Constructor::Default);
+
+    ConstructorClass tmp4 = ConstructorClass{tmp3};
+    CHECK_STATE(tmp4, 0, 0, 0, Constructor::Copy);
 }
 
 // Move tests
-TEST_CASE("Unit test: testMoveConstructor1")
+TEST_CASE("move constructor")
 {
-    Constructors::ConstructorClass tmp1 = Constructors::ConstructorClass(1, 10);
-    REQUIRE(tmp1.checkState({ 1, 10, 0, Constructors::Constructor::rvalueParam }));
-    Constructors::ConstructorClass tmp2 = std::move(tmp1);
-    REQUIRE(tmp2.checkState({ 1, 10, 0, Constructors::Constructor::Move }));
-    REQUIRE(tmp1.isFrogotten());
+    {
+        ConstructorClass tmp1 = ConstructorClass(1, 10);
+        ConstructorClass tmp2 = std::move(tmp1);
+        CHECK_STATE(tmp2, 1, 10, 0, Constructor::Move);
+        REQUIRE(tmp1.isFrogotten());
+    }
+    {
+        ConstructorClass tmp1 = ConstructorClass();
+        ConstructorClass tmp2 = (ConstructorClass&&)tmp1;
+        CHECK_STATE(tmp2, 0, 0, 0, Constructor::Move);
+        REQUIRE(tmp1.isFrogotten());
+    }
+    {
+        ConstructorClass tmp1 = ConstructorClass();
+        ConstructorClass tmp2(std::move(tmp1));
+        CHECK_STATE(tmp2, 0, 0, 0, Constructor::Move);
+        REQUIRE(tmp1.isFrogotten());
+    }
+    {
+        ConstructorClass tmp1 = ConstructorClass();
+        CHECK_STATE(tmp1, 0, 0, 0, Constructor::Default);
+        ConstructorClass tmp2 = std::move(tmp1);
+        CHECK_STATE(tmp2, 0, 0, 0, Constructor::Move);
+        REQUIRE(!tmp1.isFrogotten());  // rvalue move i.e. not forgotten
+    }
 }
 
-TEST_CASE("Unit test: testMoveConstructor2")
+TEST_CASE("move assign constructor")
 {
-    Constructors::ConstructorClass tmp1 = Constructors::ConstructorClass();
-    REQUIRE(tmp1.checkState({ 0, 0, 0, Constructors::Constructor::Default }));
-    Constructors::ConstructorClass tmp2 = (Constructors::ConstructorClass &&) tmp1;
-    REQUIRE(tmp2.checkState({ 0, 0, 0, Constructors::Constructor::Move }));
-    REQUIRE(tmp1.isFrogotten());
-}
-
-TEST_CASE("Unit test: testMoveConstructor3")
-{
-    Constructors::ConstructorClass tmp1 = Constructors::ConstructorClass();
-    REQUIRE(tmp1.checkState({ 0, 0, 0, Constructors::Constructor::Default }));
-    Constructors::ConstructorClass tmp2 = std::move(tmp1 + 1);
-    REQUIRE(tmp2.checkState({ 0, 1, 0, Constructors::Constructor::Move }));
-    // REQUIRE(tmp1.isFrogotten()); // rvalue move i.e. not forgotten
-}
-
-TEST_CASE("Unit test: testMoveAssingConstructor")
-{
-    Constructors::ConstructorClass tmp0 = Constructors::ConstructorClass();
-    Constructors::ConstructorClass tmp1 = Constructors::ConstructorClass();
-    tmp0 = (Constructors::ConstructorClass &&) tmp1;
-    REQUIRE(tmp0.checkState({ 0, 0, 0, Constructors::Constructor::MoveAssign }));
+    ConstructorClass tmp0 = ConstructorClass();
+    ConstructorClass tmp1 = ConstructorClass();
+    tmp0 = std::move(tmp1);
+    CHECK_STATE(tmp0, 0, 0, 0, Constructor::MoveAssign);
     REQUIRE(tmp1.isFrogotten());
 }
 
 // Copy tests
-TEST_CASE("Unit test: testCopyConstructor1")
+TEST_CASE("copy constructor")
 {
-    Constructors::ConstructorClass tmp1 = Constructors::ConstructorClass();
-    Constructors::ConstructorClass tmp2 = tmp1;
-    REQUIRE(tmp1.checkState({ 0, 0, 0, Constructors::Constructor::Default }));
-    REQUIRE(tmp2.checkState({ 0, 0, 0, Constructors::Constructor::Copy }));
+    {
+        ConstructorClass tmp1 = ConstructorClass();
+        ConstructorClass tmp2 = tmp1;
+        CHECK_STATE(tmp1, 0, 0, 0, Constructor::Default);
+        CHECK_STATE(tmp2, 0, 0, 0, Constructor::Copy);
+    }
+    {
+        const ConstructorClass tmp1 = ConstructorClass();
+        ConstructorClass tmp2 = tmp1;
+        CHECK_STATE(tmp1, 0, 0, 0, Constructor::Default);
+        CHECK_STATE(tmp2, 0, 0, 0, Constructor::Copy);
+    }
+    {
+        ConstructorClass tmp1 = ConstructorClass();
+        ConstructorClass tmp2 = ConstructorClass(tmp1);
+        CHECK_STATE(tmp1, 0, 0, 0, Constructor::Default);
+        CHECK_STATE(tmp2, 0, 0, 0, Constructor::Copy);
+    }
+    {
+        const ConstructorClass tmp1 = ConstructorClass();
+        ConstructorClass tmp2 = ConstructorClass(tmp1);
+        CHECK_STATE(tmp1, 0, 0, 0, Constructor::Default);
+        CHECK_STATE(tmp2, 0, 0, 0, Constructor::Copy);
+    }
 }
 
-TEST_CASE("Unit test: testCopyConstructor2")
+TEST_CASE("copy assign constructor")
 {
-    Constructors::ConstructorClass tmp1 = Constructors::ConstructorClass();
-    Constructors::ConstructorClass tmp2 = Constructors::ConstructorClass(tmp1);
-    REQUIRE(tmp1.checkState({ 0, 0, 0, Constructors::Constructor::Default }));
-    REQUIRE(tmp2.checkState({ 0, 0, 0, Constructors::Constructor::Copy }));
-}
-
-TEST_CASE("Unit test: testCopyConstructor3")
-{
-    Constructors::ConstructorClass tmp1 = Constructors::ConstructorClass();
-    Constructors::ConstructorClass tmp2 = Constructors::ConstructorClass(tmp1);
-    tmp1.setOrder(10);
-    REQUIRE(tmp1.checkState({ 10, 0, 0, Constructors::Constructor::Default }));
-    REQUIRE(tmp2.checkState({ 0, 0, 0, Constructors::Constructor::Copy }));
-}
-
-TEST_CASE("Unit test: testCopyConstructor4")
-{
-    Constructors::ConstructorClass tmp1 = Constructors::ConstructorClass();
-    Constructors::ConstructorClass tmp2(tmp1);
-
-    REQUIRE(tmp1.checkState({ 0, 0, 0, Constructors::Constructor::Default }));
-    REQUIRE(tmp2.checkState({ 0, 0, 0, Constructors::Constructor::Copy }));
-}
-
-TEST_CASE("Unit test: testCopyAssingConstructor")
-{
-    Constructors::ConstructorClass tmp0 = Constructors::ConstructorClass();
-    Constructors::ConstructorClass tmp1 = Constructors::ConstructorClass();
+    ConstructorClass tmp0 = ConstructorClass();
+    ConstructorClass tmp1 = ConstructorClass();
     tmp0 = tmp1;
-
-    REQUIRE(tmp0.checkState({ 0, 0, 0, Constructors::Constructor::CopyAssign }));
+    CHECK_STATE(tmp0, 0, 0, 0, Constructor::CopyAssign);
 }
 
-TEST_CASE("Unit test: testOperators")
+TEST_CASE("getters and setters")
 {
-    Constructors::ConstructorClass tmp1 = Constructors::ConstructorClass();
+    ConstructorClass tmp = ConstructorClass();
+
+    tmp.setData(12);
+    CHECK(tmp.getData() == 12);
+
+    tmp.setOrder(105);
+    CHECK(tmp.getOrder() == 105);
+
+    tmp.setConstructor(Constructor::Forgotten);
+    CHECK(tmp.getConstructor() == Constructor::Forgotten);
+
+    tmp.setValue(42);
+    CHECK(tmp.getValue() == 42);
+
+    int16_t* ptr = new int16_t(89);
+    tmp.setValue(ptr);
+    CHECK(tmp.getValue() == 89);
+}
+
+TEST_CASE("Operators")
+{
+    ConstructorClass tmp1 = ConstructorClass();
     tmp1 = tmp1 + 10;
-    REQUIRE(tmp1.checkState({ 0, 10, 0, Constructors::Constructor::MoveAssign }));
+    CHECK_STATE(tmp1, 0, 10, 0, Constructor::MoveAssign);
 
-    Constructors::ConstructorClass tmp2 = Constructors::ConstructorClass();
+    ConstructorClass tmp2 = ConstructorClass();
     tmp2 = tmp1 - 1;
-    REQUIRE(tmp2.checkState({ 0, 9, 0, Constructors::Constructor::MoveAssign }));
+    CHECK_STATE(tmp2, 0, 9, 0, Constructor::MoveAssign);
 
-    Constructors::ConstructorClass tmp3 = Constructors::ConstructorClass();
-    uint8_t plus = 10;
+    ConstructorClass tmp3 = ConstructorClass();
+    int16_t plus = 10;
     tmp3 = tmp3 + plus;
-    REQUIRE(tmp3.checkState({ 0, plus, 0, Constructors::Constructor::MoveAssign }));
+    CHECK_STATE(tmp3, 0, plus, 0, Constructor::MoveAssign);
 }
 
-TEST_CASE("Unit test: testWithVector")
+TEST_CASE("WithVector")
 {
-    Constructors::ConstructorClass tmp1 = Constructors::ConstructorClass();
+    ConstructorClass tmp1 = ConstructorClass();
 
-    std::vector<Constructors::ConstructorClass> v;
+    std::vector<ConstructorClass> v;
     v.reserve(10);
     v.push_back(tmp1);
     v.push_back(std::move(tmp1));
 
-    REQUIRE(v[0].checkState({ 0, 0, 0, Constructors::Constructor::Copy }));
-    REQUIRE(v[1].checkState({ 0, 0, 0, Constructors::Constructor::Move }));
+    CHECK_STATE(v.at(0), 0, 0, 0, Constructor::Copy);
+    CHECK_STATE(v.at(1), 0, 0, 0, Constructor::Move);
+}
+
+TEST_CASE("wrapped class")
+{
+    ConstructorClassWrapper tmp{};
+    CHECK_STATE(tmp.sub1, 0, 0, 0, Constructor::Default);
+    CHECK_STATE(tmp.sub2, 0, 0, 0, Constructor::MoveAssign);
+}
+
+TEST_CASE("using")
+{
+    using CC = ConstructorClass;
+    ConstructorClass tmp = CC();
+    CHECK_STATE(tmp, 0, 0, 0, Constructor::Default);
+}
+
+TEST_CASE("new")
+{
+    {
+        auto tmp = new ConstructorClass();
+        CHECK_PTR_STATE(tmp, 0, 0, 0, Constructor::Default);
+    }
+    {
+        auto tmp = *new ConstructorClass();
+        CHECK_STATE(tmp, 0, 0, 0, Constructor::Copy);
+    }
+}
+
+TEST_CASE("shared ptr")
+{
+    auto tmp = std::make_shared<ConstructorClass>();
+
+    CHECK_PTR_STATE(tmp.get(), 0, 0, 0, Constructor::Default);
 }

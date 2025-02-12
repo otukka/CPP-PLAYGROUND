@@ -12,7 +12,7 @@
 namespace Constructors
 {
 
-#define FORGOTTEN_NUMBER 255
+#define FORGOTTEN_NUMBER (int16_t)255
 
 #ifndef PRINT_CONSTRUCTORS_WHEN_USED
 #define PRINT_CONSTRUCTORS_WHEN_USED 0
@@ -22,10 +22,12 @@ void printHelper(std::string msg)
 {
 #if (PRINT_CONSTRUCTORS_WHEN_USED == 1)
     std::cout << msg;
+#else
+    (void)msg;
 #endif
 }
 
-enum Constructor
+enum Constructor : int16_t
 {
     Default = 0,
     rvalueParam,
@@ -40,83 +42,84 @@ enum Constructor
 
 };
 
-static std::array<std::string, Constructor::SIZE + 1> ConstructorNames {
-    "Default", "rvalueParam", "lvalueParam", "Copy", "CopyAssign", "Move", "MoveAssign", "Swap", "Forgotten", "ILLEGAL"
-};
+static std::array<std::string, Constructor::SIZE + 1> ConstructorNames{
+    "Default", "rvalueParam", "lvalueParam", "Copy",      "CopyAssign",
+    "Move",    "MoveAssign",  "Swap",        "Forgotten", "ILLEGAL"};
+
+// Overloading ostream operator for printing Constructor enum
+std::ostream& operator<<(std::ostream& os, const Constructor& constructor)
+{
+    if (static_cast<size_t>(constructor) < ConstructorNames.size())
+    {
+        return os << ConstructorNames[static_cast<size_t>(constructor)];
+    }
+    else
+    {
+        return os << "ILLEGAL";
+    }
+}
 
 struct State
 {
-    uint8_t m_order;
-    uint8_t m_data;
-    uint8_t value;
+    int16_t m_order;
+    int16_t m_data;
+    int16_t m_value;
     Constructor m_constructor;
 };
 
 class ConstructorClass
 {
 private:
-    uint8_t m_order;
-    uint8_t m_data;
-    uint8_t* m_ptr;
+    int16_t m_order;
+    int16_t m_data;
+    int16_t* m_value;
     Constructor m_constructor;
 
 public:
-    // // Default constructor
-    ConstructorClass() : m_order(0), m_data(0), m_constructor(Constructor::Default)
+    // Default constructor
+    ConstructorClass() : m_order(), m_data(), m_value(new int16_t(0)), m_constructor(Constructor::Default)
     {
         printHelper("Default constructor\n");
-
-        m_ptr = new uint8_t();
-        *m_ptr = 0;
     }
 
     // Default destructor
     ~ConstructorClass()
     {
-
         printHelper("Destructor\n");
-
-        delete m_ptr;
+        delete m_value;
     }
 
     // lvalue constructor
-    ConstructorClass(const int& order, const int& data) :
-        m_order(order), m_data(data), m_constructor(Constructor::lvalueParam)
+    ConstructorClass(const int16_t& order, const int16_t& data) :
+        m_order(order), m_data(data), m_value(new int16_t(0)), m_constructor(Constructor::lvalueParam)
     {
-
         printHelper("lvalue constructor\n");
-
-        m_ptr = new uint8_t();
-        *m_ptr = 0;
     }
 
     // rvalue constructor
-    ConstructorClass(const int&& order, const int&& data) :
+    ConstructorClass(const int16_t&& order, const int16_t&& data) :
         m_order(order), m_data(data), m_constructor(Constructor::rvalueParam)
     {
 
         printHelper("rvalue constructor\n");
 
-        m_ptr = new uint8_t();
-        *m_ptr = 0;
+        m_value = new int16_t();
+        *m_value = 0;
     }
 
     // Copy constructor (lvalue)
     ConstructorClass(const ConstructorClass& other) :
-        m_order(other.m_order), m_data(other.m_data), m_constructor(Constructor::Copy)
+        m_order(other.m_order), m_data(other.m_data), m_value(new int16_t(*other.m_value)),
+        m_constructor(Constructor::Copy)
     {
-
         printHelper("Copy constructor\n");
-
-        m_ptr = new uint8_t();
-        *m_ptr = *other.m_ptr;
     }
 
-    // Copy operator (lvalue)
+    // Copy assignment operator (lvalue)
     ConstructorClass& operator=(const ConstructorClass& other)
     {
 
-        printHelper("Copy operator\n");
+        printHelper("Copy assignment operator\n");
         ConstructorClass tmp(other);
         swap(*this, tmp);
         this->m_constructor = Constructor::CopyAssign;
@@ -125,7 +128,7 @@ public:
 
     // Move constructor (rvalue)
     ConstructorClass(ConstructorClass&& other) noexcept :
-        m_order(std::move(other.m_order)), m_data(std::move(other.m_data)), m_ptr(std::move(other.m_ptr)),
+        m_order(std::move(other.m_order)), m_data(std::move(other.m_data)), m_value(std::move(other.m_value)),
         m_constructor(Constructor::Move)
     {
 
@@ -133,21 +136,21 @@ public:
 
         other.m_data = FORGOTTEN_NUMBER;
         other.m_order = FORGOTTEN_NUMBER;
-        other.m_ptr = nullptr;
+        other.m_value = nullptr;
         other.m_constructor = Constructor::Forgotten;
     }
 
-    // Move operator (lvalue)
+    // Move assignment operator (lvalue)
     ConstructorClass& operator=(ConstructorClass&& other)
     {
 
-        printHelper("Move operator\n");
+        printHelper("Move assignment operator\n");
 
         if (this != &other)
         {
 
             // Move data
-            *m_ptr = std::move(*other.m_ptr);
+            *m_value = std::move(*other.m_value);
             m_order = std::move(other.m_order);
             m_data = std::move(other.m_data);
             m_constructor = Constructor::MoveAssign;
@@ -155,8 +158,8 @@ public:
             // Cleanup
             other.m_data = FORGOTTEN_NUMBER;
             other.m_order = FORGOTTEN_NUMBER;
-            delete other.m_ptr;
-            other.m_ptr = nullptr;
+            delete other.m_value;
+            other.m_value = nullptr;
             other.m_constructor = Constructor::Forgotten;
         }
         return *this;
@@ -169,36 +172,29 @@ public:
 
         std::swap(a.m_data, b.m_data);
         std::swap(a.m_order, b.m_order);
-        std::swap(a.m_ptr, b.m_ptr);
+        std::swap(a.m_value, b.m_value);
         a.m_constructor = Constructor::Swap;
         b.m_constructor = Constructor::Swap;
     }
 
-    ConstructorClass operator+(const int& data)
+    ConstructorClass operator+(const int16_t& data)
     {
         return ConstructorClass(this->m_order, this->m_data + data);
     }
 
-    ConstructorClass operator-(const int& data)
+    ConstructorClass operator-(const int16_t& data)
     {
         return ConstructorClass(this->m_order, this->m_data - data);
     }
 
-    ConstructorClass operator+(const int&& data)
+    ConstructorClass operator+(const int16_t&& data)
     {
         return ConstructorClass(this->m_order, this->m_data + data);
     }
 
-    ConstructorClass operator-(const int&& data)
+    ConstructorClass operator-(const int16_t&& data)
     {
         return ConstructorClass(this->m_order, this->m_data - data);
-    }
-
-    bool checkState(State state)
-    {
-
-        return (this->m_data == state.m_data && this->m_order == state.m_order && *this->m_ptr == state.value
-                && this->m_constructor == state.m_constructor);
     }
 
     bool isFrogotten()
@@ -206,50 +202,43 @@ public:
         return m_constructor == Constructor::Forgotten;
     }
 
-    bool _checkState(State state)
+    Constructor getConstructor() const
     {
-        std::cout << *this << std::endl;
-        return checkState(state);
+        return this->m_constructor;
     }
-
-    int getOrder()
+    int16_t getOrder() const
     {
         return this->m_order;
     }
-    int getData()
+    int16_t getData() const
     {
         return this->m_data;
     }
-    void setOrder(const int& order)
+    int16_t getValue() const
+    {
+        return *this->m_value;
+    }
+
+    void setConstructor(const Constructor& constructor)
+    {
+        m_constructor = constructor;
+    }
+    void setOrder(const int16_t& order)
     {
         m_order = order;
     }
-    void setData(const int& data)
+    void setData(const int16_t& data)
     {
         m_data = data;
     }
-    void setOrder(const int&& order)
+    void setValue(const int16_t& value)
     {
-        m_order = order;
+        *m_value = value;
     }
-    void setData(const int&& data)
+    void setValue(int16_t* value)
     {
-        m_data = data;
-    }
-    friend auto operator<<(std::ostream& os, ConstructorClass const& m) -> std::ostream&
-    {
-        if (m.m_ptr == nullptr)
-        {
-            return os << std::left << std::setw(15) << "Order: " << std::setw(3) << static_cast<int>(m.m_order)
-                      << std::left << std::setw(15) << "Data: " << std::left << std::setw(3)
-                      << static_cast<int>(m.m_data) << std::left << std::setw(15) << "ptr == nullptr" << std::left
-                      << std::setw(15) << "Constructor: " << ConstructorNames[m.m_constructor];
-        }
-        return os << std::left << std::setw(15) << "Order: " << std::setw(3) << static_cast<int>(m.m_order) << std::left
-                  << std::setw(15) << "Data: " << std::left << std::setw(3) << static_cast<int>(m.m_data) << std::left
-                  << std::setw(15) << "ptr address : " << std::setw(20) << m.m_ptr << std::left << std::setw(15)
-                  << "ptr value : " << std::setw(3) << *m.m_ptr << std::left << std::setw(15)
-                  << "Constructor: " << ConstructorNames[m.m_constructor];
+        delete m_value;
+        m_value = value;
     }
 };
 
@@ -261,24 +250,28 @@ public:
     ~DerivedConstructorClass();
 };
 
-std::string value(ConstructorClass& mc)
+std::string lvalueORrvalue(ConstructorClass& mc)
 {
+    (void)mc;
     return "lvalue";
 }
 
-std::string value(ConstructorClass&& mc)
+std::string lvalueORrvalue(ConstructorClass&& mc)
 {
+    (void)mc;
     return "rvalue";
 }
-std::string value(const ConstructorClass& mc)
+std::string lvalueORrvalue(const ConstructorClass& mc)
 {
+    (void)mc;
     return "lvalue";
 }
 
-std::string value(const ConstructorClass&& mc)
+std::string lvalueORrvalue(const ConstructorClass&& mc)
 {
+    (void)mc;
     return "rvalue";
 }
 }
 
-#endif // CONSTRUCTORCLASS_H
+#endif  // CONSTRUCTORCLASS_H

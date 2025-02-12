@@ -1,14 +1,10 @@
 
 
-
-cmake_minimum_required(VERSION 3.16)
-
-
 set(CMAKE_THREAD_PREFER_PTHREAD TRUE)
 set(THREADS_PREFER_PTHREAD_FLAG TRUE)
 find_package(Threads REQUIRED)
 
-add_library(ThreadLibraryExample)
+add_library(ThreadLibraryExample SHARED)
 
 target_sources(
     ThreadLibraryExample 
@@ -27,5 +23,3 @@ target_include_directories(
     PUBLIC
     inc
 )
-
-

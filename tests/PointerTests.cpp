@@ -17,7 +17,7 @@ public:
     B(const B&& other) noexcept : a(other.a) {}
     B& operator=(const B& other)
     {
-        B copy(this->a);
+        B copy(other.a);
         swap(*this, copy);
         return *this;
     }
@@ -64,7 +64,7 @@ public:
 
 }  // Anonymous namespace
 
-TEST_CASE("Contruction")
+TEST_CASE("Pointer tests")
 {
     A a{};
 }

@@ -8,14 +8,14 @@ TEST_CASE("Distinguish empty and full")
     ringbufferInit();
     CHECK(isEmpty() == true);
     CHECK(isFull() == false);
-    for (size_t i = 0; i < RINGBUFFER_LENGTH - 1; i++)
+    for (uint32_t i = 0; i < RINGBUFFER_LENGTH - 1; i++)
     {
         addValue(i);
         CHECK(isFull() == false);
         CHECK(isEmpty() == false);
     }
 
-    for (size_t i = 0; i < RINGBUFFER_LENGTH * 10; i++)
+    for (uint32_t i = 0; i < RINGBUFFER_LENGTH * 10; i++)
     {
         addValue(i);
         CHECK(isFull() == true);
@@ -30,12 +30,12 @@ TEST_CASE("Fill to full then empty")
     CHECK(isEmpty() == true);
     CHECK(isFull() == false);
 
-    for (size_t i = 0; i < RINGBUFFER_LENGTH; i++)
+    for (uint32_t i = 0; i < RINGBUFFER_LENGTH; i++)
     {
         addValue(i);
     }
 
-    uint32_t* buffer = getValues(RINGBUFFER_LENGTH);
+    // uint32_t* buffer = getValues(RINGBUFFER_LENGTH);
 
     CHECK(isEmpty() == true);
     CHECK(isFull() == false);
@@ -45,7 +45,7 @@ TEST_CASE("Size never too large")
 {
     ringbufferInit();
     CHECK(isEmpty() == true);
-    for (size_t i = 0; i < 10000; i++)
+    for (uint32_t i = 0; i < 10000; i++)
     {
 
         addValue(i);
@@ -66,7 +66,7 @@ TEST_CASE("Size never too large")
 TEST_CASE("Basic fill ringbuffer")
 {
     ringbufferInit();
-    for (size_t i = 0; i < (RINGBUFFER_LENGTH - 1); i++)
+    for (uint32_t i = 0; i < (RINGBUFFER_LENGTH - 1); i++)
     {
 
         addValue(i);
@@ -83,7 +83,7 @@ TEST_CASE("Basic fill ringbuffer")
     CHECK(getSize() == RINGBUFFER_LENGTH);
 
     uint32_t* buffer = getValues(RINGBUFFER_LENGTH);
-    for (size_t i = 0; i < RINGBUFFER_LENGTH; i++)
+    for (uint32_t i = 0; i < RINGBUFFER_LENGTH; i++)
     {
         CHECK(buffer[i] == i);
     }
@@ -92,13 +92,13 @@ TEST_CASE("Basic fill ringbuffer")
 TEST_CASE("More complex fill ringbuffer")
 {
     ringbufferInit();
-    for (size_t i = 0; i < RINGBUFFER_LENGTH; i++)
+    for (uint32_t i = 0; i < RINGBUFFER_LENGTH; i++)
     {
         addValue(i);
     }
 
     uint32_t* buffer = getValues((RINGBUFFER_LENGTH / 2));
-    for (size_t i = 0; i < (RINGBUFFER_LENGTH / 2); i++)
+    for (uint32_t i = 0; i < (RINGBUFFER_LENGTH / 2); i++)
     {
         CHECK(buffer[i] == i);
     }
@@ -106,7 +106,7 @@ TEST_CASE("More complex fill ringbuffer")
     CHECK(getStart() == (RINGBUFFER_LENGTH / 2));
     CHECK(getEnd() == 0);
 
-    for (size_t i = 0; i < (RINGBUFFER_LENGTH / 2); i++)
+    for (uint32_t i = 0; i < (RINGBUFFER_LENGTH / 2); i++)
     {
         addValue(i);
     }
@@ -115,7 +115,7 @@ TEST_CASE("More complex fill ringbuffer")
     CHECK(getEnd() == (RINGBUFFER_LENGTH / 2));
     CHECK(getSize() == RINGBUFFER_LENGTH);
 
-    for (size_t i = 0; i < (RINGBUFFER_LENGTH / 2); i++)
+    for (uint32_t i = 0; i < (RINGBUFFER_LENGTH / 2); i++)
     {
         addValue(i);
     }
@@ -133,7 +133,7 @@ TEST_CASE("More complex fill ringbuffer")
 TEST_CASE("Read at center")
 {
     ringbufferInit();
-    for (size_t i = 0; i < RINGBUFFER_LENGTH; i++)
+    for (uint32_t i = 0; i < RINGBUFFER_LENGTH; i++)
     {
         addValue(i);
     }
@@ -142,7 +142,7 @@ TEST_CASE("Read at center")
     CHECK(getEnd() == 0);
 
     uint32_t* buffer = getValues((RINGBUFFER_LENGTH / 2));
-    for (size_t i = 0; i < (RINGBUFFER_LENGTH / 2); i++)
+    for (uint32_t i = 0; i < (RINGBUFFER_LENGTH / 2); i++)
     {
         CHECK(buffer[i] == i);
     }
@@ -150,7 +150,7 @@ TEST_CASE("Read at center")
     CHECK(getStart() == (RINGBUFFER_LENGTH / 2));
     CHECK(getEnd() == 0);
 
-    for (size_t i = RINGBUFFER_LENGTH; i < (RINGBUFFER_LENGTH * 3 / 2); i++)
+    for (uint32_t i = RINGBUFFER_LENGTH; i < (RINGBUFFER_LENGTH * 3 / 2); i++)
     {
         addValue(i);
     }
@@ -163,7 +163,7 @@ TEST_CASE("Read at center")
     CHECK(getStart() == (RINGBUFFER_LENGTH / 2));
     CHECK(getEnd() == (RINGBUFFER_LENGTH / 2));
 
-    for (size_t i = RINGBUFFER_LENGTH; i < (RINGBUFFER_LENGTH * 2); i++)
+    for (uint32_t i = RINGBUFFER_LENGTH; i < (RINGBUFFER_LENGTH * 2); i++)
     {
         CHECK(buffer[i - RINGBUFFER_LENGTH] == i - (RINGBUFFER_LENGTH / 2));
     }
@@ -172,12 +172,12 @@ TEST_CASE("Read at center")
 TEST_CASE("Fill empty one by one")
 {
     ringbufferInit();
-    for (size_t i = 0; i < RINGBUFFER_LENGTH; i++)
+    for (uint32_t i = 0; i < RINGBUFFER_LENGTH; i++)
     {
         addValue(i);
     }
 
-    for (size_t i = 0; i < RINGBUFFER_LENGTH; i++)
+    for (uint32_t i = 0; i < RINGBUFFER_LENGTH; i++)
     {
         CHECK(getStart() == i);
         uint32_t* buffer = getValues(1);
